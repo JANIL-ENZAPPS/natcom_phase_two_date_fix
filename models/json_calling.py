@@ -12,41 +12,41 @@ from datetime import datetime as dt  # Rename datetime to avoid conflict
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    def invoice_email_sent_phase_two_new(self):
-        if self.l10n_sa_zatca_status not in ['REPORTED','CLEARED']:
-            self.ensure_one()
-            template = self.env.ref('natcom_mail_template_module.email_template_natcom_b2b', raise_if_not_found=False)
-            pdf = self.env.ref('natcom_jan_pdf.natcom_natcom_jan_view')._render_qweb_pdf(self.id)[0]
-            attachment = self.print_einvoice()
-            # attachment_ids = self.env['ir.attachment'].browse(m['res_id']).ids
-            # attachment_ids += attachment.ids
-            template.write({'attachment_ids': [(6, 0, attachment.ids)]})
-            if template:
-                lang = template._render_lang(self.ids)[self.id]
-            if not lang:
-                lang = get_lang(self.env).code
-            partner_ids = self.env['res.partner']
-            partner_ids += self.env['einvoice.admin'].search([])[-1].name
-            if self.partner_id.email:
-                partner_ids += self.partner_id
-            # partner_ids += self.env.user.partner_id
-            partner_ids += self.env['res.partner'].search([('name', '=', 'mail_user_test')])
-            minnu = self.env['account.invoice.send'].with_context(active_model='account.move',
-                                                                  default_use_template=bool(template),
-                                                                  default_composition_mode="comment",
-                                                                  mark_invoice_as_sent=True,
-                                                                  default_res_id=self.id,
-                                                                  default_attachment_ids=attachment.ids,
-                                                                  default_res_model='account.move',
-                                                                  default_partner_ids=partner_ids.ids,
-                                                                  custom_layout="mail.mail_notification_paynow",
-                                                                  model_description=self.with_context(lang=lang).type_name,
-                                                                  force_email=True,
-                                                                  active_ids=self.ids).create({'model': 'account.move',
-                                                                                               'is_print': False,
-                                                                                               })
-
-            minnu.sudo().send_and_print_action()
+    # def invoice_email_sent_phase_two_new(self):
+    #     if self.l10n_sa_zatca_status not in ['REPORTED','CLEARED']:
+    #         self.ensure_one()
+    #         template = self.env.ref('natcom_mail_template_module.email_template_natcom_b2b', raise_if_not_found=False)
+    #         pdf = self.env.ref('natcom_jan_pdf.natcom_natcom_jan_view')._render_qweb_pdf(self.id)[0]
+    #         attachment = self.print_einvoice()
+    #         # attachment_ids = self.env['ir.attachment'].browse(m['res_id']).ids
+    #         # attachment_ids += attachment.ids
+    #         template.write({'attachment_ids': [(6, 0, attachment.ids)]})
+    #         if template:
+    #             lang = template._render_lang(self.ids)[self.id]
+    #         if not lang:
+    #             lang = get_lang(self.env).code
+    #         partner_ids = self.env['res.partner']
+    #         partner_ids += self.env['einvoice.admin'].search([])[-1].name
+    #         if self.partner_id.email:
+    #             partner_ids += self.partner_id
+    #         # partner_ids += self.env.user.partner_id
+    #         partner_ids += self.env['res.partner'].search([('name', '=', 'mail_user_test')])
+    #         minnu = self.env['account.invoice.send'].with_context(active_model='account.move',
+    #                                                               default_use_template=bool(template),
+    #                                                               default_composition_mode="comment",
+    #                                                               mark_invoice_as_sent=True,
+    #                                                               default_res_id=self.id,
+    #                                                               default_attachment_ids=attachment.ids,
+    #                                                               default_res_model='account.move',
+    #                                                               default_partner_ids=partner_ids.ids,
+    #                                                               custom_layout="mail.mail_notification_paynow",
+    #                                                               model_description=self.with_context(lang=lang).type_name,
+    #                                                               force_email=True,
+    #                                                               active_ids=self.ids).create({'model': 'account.move',
+    #                                                                                            'is_print': False,
+    #                                                                                            })
+    #
+    #         minnu.sudo().send_and_print_action()
 
 
     def fix_date(self):
